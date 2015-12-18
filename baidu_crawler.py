@@ -124,6 +124,8 @@ def my_crawler(s_num, e_num, word):
 
     #print task
     pool.map(baidu_crawler,task)
+    pool.close()
+    pool.join()
 
 
 if __name__ == '__main__':
