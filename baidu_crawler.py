@@ -7,7 +7,7 @@ import datetime
 import socket
 import os
 import sys
-
+from multiprocessing import Pool
 
 # from threading import Thread
 
@@ -33,7 +33,11 @@ def parse_url(s):
     return p
 
 
-def baidu_crawler(start, word, ren):
+#def baidu_crawler(start, word, ren):
+def baidu_crawler(info):
+    start = info[0]
+    ren = info[1]
+    word = info[2]
     # json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ie=utf-8&pn=%s&word=%s&rn=%s&itg=0&z=0&fr=&width=&height=&lm=-1&ic=0&s=0&st=-1#'''
     json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord=%s&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&word=%s&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=&fr=ala&pn=%s&rn=%s&gsm=3c&1450340113203#'''
     key_word = []
@@ -95,14 +99,24 @@ def baidu_crawler(start, word, ren):
 
 
 def my_crawler(s_num, e_num, word):
-    i = s_num
-    num = e_num - s_num
-    while num / 60 != 0:
-        baidu_crawler(i, word, 60)
-        i += 60
-        num -= 60
+    # i = s_num
+    # num = e_num - s_num
+    # while num / 60 != 0:
+        # baidu_crawler(i, word, 60)
+        # i += 60
+        # num -= 60
 
-    baidu_crawler(i, word, num)
+    # baidu_crawler(i, word, num)
+    # multiprocessing implenmention
+    pool = Pool(4)
+    qc = 60#query count once
+    task = [(x-qc,x, word) for x in range(s_num, e_num) if x%qc == 0]
+    last_index = task[len(task)-1][1]
+    if last_index  <> e_num:
+        task.append((last_index, e_num, word))
+
+    #print task
+    pool.map(baidu_crawler,task)
 
 
 if __name__ == '__main__':
