@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # coding:utf-8
 
 import re
@@ -51,8 +52,10 @@ def baidu_crawler(info):
     url = json_url % (key_word_string, key_word_string, str(start), str(ren))
     print url
 
+    #headers = {'Accept': 'image/webp',
+    #           'User-Agent': '''Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6''',}
     headers = {'Accept': 'image/webp',
-               'User-Agent': '''Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6''',}
+               'User-Agent': '''Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36''',}
     req = urllib2.Request(url, headers=headers)
     try:
         content = urllib2.urlopen(req).read()
@@ -69,14 +72,15 @@ def baidu_crawler(info):
         real_url = parse_url(result)
         # real_url = result
         # print real_url
-        i += 1
-        pic_name = "%s_%s.jpg" % (pre_name, str(datetime.datetime.now().second) + '_' + str(i))
-
+        pic_name = "%s_%s.jpg" % (pre_name, str(i)+'_'+str(datetime.datetime.now().second)  )
         print 'downloading pic No.%s' % str(i)
+        i += 1
 
-        if not os.path.exists('pics'):
-            os.mkdir('pics')
-        name = 'pics/%s' % pic_name
+        dirname = '_'.join([pre_name, str(start_num), str(end_num)])
+
+        if not os.path.exists(dirname):
+            os.mkdir(dirname)
+        name = dirname+'/%s' % pic_name
         if os.path.isfile(name):
             os.remove(name)
         try:
@@ -108,12 +112,15 @@ def my_crawler(s_num, e_num, word):
 
     # baidu_crawler(i, word, num)
     # multiprocessing implenmention
-    pool = Pool(4)
+    pool = Pool(10)
     qc = 60#query count once
-    task = [(x-qc,x, word) for x in range(s_num, e_num) if x%qc == 0]
-    last_index = task[len(task)-1][1]
-    if last_index  <> e_num:
-        task.append((last_index, e_num, word))
+    task = [(x-qc, x, word) for x in range(s_num, e_num) if x%qc == 0]
+    if len(task) == 0:
+        task.append((s_num, e_num, word))
+    else:
+        last_index = task[len(task)-1][1]
+        if last_index  <> e_num:
+            task.append((last_index, e_num, word))
 
     #print task
     pool.map(baidu_crawler,task)
