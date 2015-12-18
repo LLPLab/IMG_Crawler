@@ -4,15 +4,12 @@
 import re
 import urllib2
 import urllib
-import datetime
 import socket
 import os
 import sys
 from multiprocessing import Pool
-
-# from threading import Thread
-
-
+import threading
+import time
 
 def parse_url(s):
     dic = {
@@ -33,12 +30,43 @@ def parse_url(s):
 
     return p
 
+def imgs_retrieve(result, page, i, imgs_per_page, pre_name):
+    real_url = parse_url(result)
+    # real_url = result
+    # print real_url
+    pic_name = "%s_%s_%s.jpg" % (pre_name, str(page),  str(i) )
+    print 'downloading pic No.%s' % str(i+(page-1)*imgs_per_page)
+
+    dirname = '_'.join([pre_name, str((page-1)/10*10+1),str(((page-1)/10+1)*10)])
+
+    if not os.path.exists(dirname):
+        os.mkdir(dirname)
+    name = dirname+'/%s' % pic_name
+    if os.path.isfile(name):
+        os.remove(name)
+    try:
+        socket.setdefaulttimeout(10)
+        urllib.urlretrieve(real_url, name)
+    except urllib.ContentTooShortError, e:
+        print 'error 1'
+        print e
+        os.remove(name)
+    except socket.timeout, e:
+        print 'error 2'
+        print e
+        os.remove(name)
+    except IOError, e:
+        print 'error 3'
+        print e
+
 
 #def baidu_crawler(start, word, ren):
-def baidu_crawler(info):
-    start = info[0]
-    ren = info[1]
-    word = info[2]
+def baidu_crawler(task):
+    imgs_per_page = 60
+    page = task[0]
+    start = (page-1)*imgs_per_page
+    end = (page)*imgs_per_page
+    word = task[1]
     # json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ie=utf-8&pn=%s&word=%s&rn=%s&itg=0&z=0&fr=&width=&height=&lm=-1&ic=0&s=0&st=-1#'''
     json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord=%s&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&word=%s&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=&fr=ala&pn=%s&rn=%s&gsm=3c&1450340113203#'''
     key_word = []
@@ -49,11 +77,9 @@ def baidu_crawler(info):
     key_word_string = '+'.join(key_word)
     pre_name = '_'.join(word)
 
-    url = json_url % (key_word_string, key_word_string, str(start), str(ren))
+    url = json_url % (key_word_string, key_word_string, str(start), str(end))
     print url
 
-    #headers = {'Accept': 'image/webp',
-    #           'User-Agent': '''Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.6) Gecko/20091201 Firefox/3.5.6''',}
     headers = {'Accept': 'image/webp',
                'User-Agent': '''Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36''',}
     req = urllib2.Request(url, headers=headers)
@@ -67,61 +93,54 @@ def baidu_crawler(info):
     pattern_url = re.compile(r'\"objURL\":\"(.*?)\",', re.S)
     result_pic = pattern_url.findall(content)
 
-    i = start
+    i = 0
+    threads = []
     for result in result_pic:
-        real_url = parse_url(result)
-        # real_url = result
-        # print real_url
-        pic_name = "%s_%s.jpg" % (pre_name, str(i)+'_'+str(datetime.datetime.now().second)  )
-        print 'downloading pic No.%s' % str(i)
-        i += 1
-
-        dirname = '_'.join([pre_name, str(start_num), str(end_num)])
-
-        if not os.path.exists(dirname):
-            os.mkdir(dirname)
-        name = dirname+'/%s' % pic_name
-        if os.path.isfile(name):
-            os.remove(name)
-        try:
-            socket.setdefaulttimeout(20)
-            urllib.urlretrieve(real_url, name)
-        except urllib.ContentTooShortError, e:
-            print 'error 1'
-            print e
-            os.remove(name)
-        except socket.timeout, e:
-            print 'error 2'
-            print e
-            os.remove(name)
-        except IOError, e:
-            print 'error 3'
-            print e
-            # f = open(name%str(i),'w+')
-            # f.write(content)
-            # f.close()
+        t = threading.Thread(target=imgs_retrieve, args=(result, page, i, imgs_per_page, pre_name,))
+        t.start()
+        threads.append(t)
+        i = i+1
+        time.sleep(0.2)
+    for t in threads:
+        t.join()
 
 
-def my_crawler(s_num, e_num, word):
-    # i = s_num
-    # num = e_num - s_num
-    # while num / 60 != 0:
-        # baidu_crawler(i, word, 60)
-        # i += 60
-        # num -= 60
+        # real_url = parse_url(result)
+        # # real_url = result
+        # # print real_url
+        # i += 1
+        # pic_name = "%s_%s_%s.jpg" % (pre_name, str(page),  str(i) )
+        # print 'downloading pic No.%s' % str(i+(page-1)*imgs_per_page)
 
-    # baidu_crawler(i, word, num)
+        # dirname = '_'.join([pre_name, str(page/10*10+1),str((page/10+1)*10)])
+
+        # if not os.path.exists(dirname):
+            # os.mkdir(dirname)
+        # name = dirname+'/%s' % pic_name
+        # if os.path.isfile(name):
+            # os.remove(name)
+        # try:
+            # socket.setdefaulttimeout(20)
+            # urllib.urlretrieve(real_url, name)
+        # except urllib.ContentTooShortError, e:
+            # print 'error 1'
+            # print e
+            # os.remove(name)
+        # except socket.timeout, e:
+            # print 'error 2'
+            # print e
+            # os.remove(name)
+        # except IOError, e:
+            # print 'error 3'
+            # print e
+            # # f = open(name%str(i),'w+')
+            # # f.write(content)
+            # # f.close()
+
+def my_crawler(sp, ep, word):
     # multiprocessing implenmention
-    pool = Pool(10)
-    qc = 60#query count once
-    task = [(x-qc, x, word) for x in range(s_num, e_num) if x%qc == 0]
-    if len(task) == 0:
-        task.append((s_num, e_num, word))
-    else:
-        last_index = task[len(task)-1][1]
-        if last_index  <> e_num:
-            task.append((last_index, e_num, word))
-
+    pool = Pool(4)
+    task = [(x, word) for x in range(sp, ep+1)]
     #print task
     pool.map(baidu_crawler,task)
     pool.close()
@@ -133,10 +152,10 @@ if __name__ == '__main__':
     args = sys.argv
     if len(args) < 4:
         print u'参数格式错误'
-        print u'格式：python baidu_crawler.py start_num end_num word\nstart_num:开始序号\nend_num:结束序号\nword:关键字(关键字可以用空格隔开)'
+        print u'格式：python baidu_crawler.py start_page end_page word\nstart_num:开始页码\nend_num:结束页码\nword:关键字(关键字可以用空格隔开)'
         sys.exit(0)
-    start_num = int(args[1])
-    end_num = int(args[2])
+    start_page= int(args[1])
+    end_page= int(args[2])
     word = args[3:]
 
-    my_crawler(start_num, end_num, word)
+    my_crawler(start_page, end_page, word)
