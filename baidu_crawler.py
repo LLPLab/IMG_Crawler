@@ -38,7 +38,7 @@ def imgs_retrieve(result, page, i, imgs_per_page, pre_name):
     pic_name = "%s_%s_%s.jpg" % (pre_name, str(page), str(i))
     print 'downloading pic No.%s' % str(i + (page - 1) * imgs_per_page)
 
-    dirname = '_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
+    dirname = 'Baidu_'+'_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
 
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -66,17 +66,17 @@ def baidu_crawler(task):
     imgs_per_page = 60
     page = task[0]
     start = (page - 1) * imgs_per_page
-    end = (page) * imgs_per_page
-    word = task[1]
+    end = page * imgs_per_page
+    _word = task[1]
     # json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ie=utf-8&pn=%s&word=%s&rn=%s&itg=0&z=0&fr=&width=&height=&lm=-1&ic=0&s=0&st=-1#'''
     json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord=%s&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&word=%s&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=&fr=ala&pn=%s&rn=%s&gsm=3c&1450340113203#'''
     key_word = []
-    for item in word:
+    for item in _word:
         a = urllib.quote(item)
         key_word.append(a)
 
     key_word_string = '+'.join(key_word)
-    pre_name = '_'.join(word)
+    pre_name = '_'.join(_word)
 
     url = json_url % (key_word_string, key_word_string, str(start), str(end))
     print url
@@ -105,38 +105,6 @@ def baidu_crawler(task):
     for t in threads:
         t.join()
 
-
-        # real_url = parse_url(result)
-        # # real_url = result
-        # # print real_url
-        # i += 1
-        # pic_name = "%s_%s_%s.jpg" % (pre_name, str(page),  str(i) )
-        # print 'downloading pic No.%s' % str(i+(page-1)*imgs_per_page)
-
-        # dirname = '_'.join([pre_name, str(page/10*10+1),str((page/10+1)*10)])
-
-        # if not os.path.exists(dirname):
-        # os.mkdir(dirname)
-        # name = dirname+'/%s' % pic_name
-        # if os.path.isfile(name):
-        # os.remove(name)
-        # try:
-        # socket.setdefaulttimeout(20)
-        # urllib.urlretrieve(real_url, name)
-        # except urllib.ContentTooShortError, e:
-        # print 'error 1'
-        # print e
-        # os.remove(name)
-        # except socket.timeout, e:
-        # print 'error 2'
-        # print e
-        # os.remove(name)
-        # except IOError, e:
-        # print 'error 3'
-        # print e
-        # # f = open(name%str(i),'w+')
-        # # f.write(content)
-        # # f.close()
 
 
 def my_crawler(sp, ep, w):

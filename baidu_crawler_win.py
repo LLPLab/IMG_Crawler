@@ -39,7 +39,7 @@ def imgs_retrieve(result, page, i, imgs_per_page, pre_name):
     pic_name = pic_name.decode('gbk')
     print 'downloading pic No.%s' % str(i + (page - 1) * imgs_per_page)
 
-    dirname = '_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
+    dirname = 'Baidu_'+'_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
     #保证目录名称编码是GBK
     dirname = dirname.decode('gbk')
     if not os.path.exists(dirname):

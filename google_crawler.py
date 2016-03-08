@@ -39,7 +39,7 @@ def imgs_retrieve(result, page, i, imgs_per_page, pre_name):
     pic_name = "%s_%s_%s.jpg" % (pre_name, str(page), str(i))
     print 'downloading pic No.%s' % str(i + (page - 1) * imgs_per_page)
 
-    dirname = '_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
+    dirname = 'Google_'+'_'.join([pre_name, str((page - 1) / 10 * 10 + 1), str(((page - 1) / 10 + 1) * 10)])
 
     if not os.path.exists(dirname):
         os.mkdir(dirname)
@@ -71,7 +71,7 @@ def baidu_crawler(task):
     word = task[1]
     # json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ie=utf-8&pn=%s&word=%s&rn=%s&itg=0&z=0&fr=&width=&height=&lm=-1&ic=0&s=0&st=-1#'''
     # json_url = '''http://image.baidu.com/search/acjson?tn=resultjson_com&ipn=rj&ct=201326592&is=&fp=result&queryWord=%s&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&word=%s&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=&fr=ala&pn=%s&rn=%s&gsm=3c&1450340113203#'''
-    json_url = '''https://www.google.com/search?newwindow=1&hl=en&authuser=0&site=imghp&tbm=isch&source=hp&biw=1214&bih=705&q=%s&oq=%s&start=%s&end=%s&ei=vPaYVsphysqPA7yJo7AB&ved=0ahUKEwjKr_nW-KvKAhVK5WMKHbzECBYQuT0IJCgB&vet=10ahUKEwjKr_nW-KvKAhVK5WMKHbzECBYQuT0IJCgB.vPaYVsphysqPA7yJo7AB.i&ijn=%s'''
+    json_url = '''https://www.google.com.hk/search?newwindow=1&hl=en&authuser=0&site=imghp&tbm=isch&source=hp&biw=1214&bih=705&q=%s&oq=%s&start=%s&end=%s&ei=vPaYVsphysqPA7yJo7AB&ved=0ahUKEwjKr_nW-KvKAhVK5WMKHbzECBYQuT0IJCgB&vet=10ahUKEwjKr_nW-KvKAhVK5WMKHbzECBYQuT0IJCgB.vPaYVsphysqPA7yJo7AB.i&ijn=%s'''
     key_word = []
     for item in word:
         a = urllib.quote(item)
